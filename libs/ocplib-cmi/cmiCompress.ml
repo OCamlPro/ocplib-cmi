@@ -45,11 +45,11 @@ let map_option f x = match x with None -> None | Some x -> Some (f x)
 
 #include "cmiCompress403.ml"
 
-#elif OCAML_VERSION = "4.02.1"
+#elif OCAML_VERSION >= "4.02.0"
 
 #include "cmiCompress402.ml"
 
-#elif OCAML_VERSION = "4.01.0"
+#elif OCAML_VERSION >= "4.01.0"
 
 #include "cmiCompress401.ml"
 
