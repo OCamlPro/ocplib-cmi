@@ -1,0 +1,22 @@
+
+oflags = '[ -w +a-4 ];
+ocaml.bytecomp = oflags;
+ocaml.asmcomp = oflags;
+
+OCaml.library("ocplib-cmi", ocaml +
+  {
+    files = [
+      "maxShare.ml";
+      "cmiUtils.ml", { pp = "ocp-pp" };
+      "cmiCompress.ml", { pp = "ocp-pp" };
+    ];
+    requires = [ "compiler-libs.common" ];
+  });
+
+OCaml.program("ocp-cmi-compress", ocaml +
+  {
+    files = [
+      "cmiMain.ml"
+    ];
+    requires = [ "ocplib-cmi" ];
+  });
