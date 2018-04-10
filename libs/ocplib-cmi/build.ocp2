@@ -1,5 +1,5 @@
 
-oflags = '[ -w +a-4 ];
+oflags = [ "-w"; "+a-4" ];
 ocaml.bytecomp = oflags;
 ocaml.asmcomp = oflags;
 
@@ -8,7 +8,14 @@ OCaml.library("ocplib-cmi", ocaml +
     files = [
       "maxShare.ml";
       "cmiUtils.ml", { pp = "ocp-pp" };
-      "cmiCompress.ml", { pp = "ocp-pp" };
+      "cmiCompress.ml", { pp = "ocp-pp";
+        more_deps = [
+          "cmiCompress401.ml";
+          "cmiCompress402.ml";
+          "cmiCompress403.ml";
+          "cmiCompress404.ml";
+          ];
+      };
     ];
     requires = [ "compiler-libs.common" ];
   });
