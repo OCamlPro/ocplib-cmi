@@ -18,15 +18,17 @@ let getsize filename =
 
 let compress_file filename =
   let size0 = getsize filename in
-  let _crc, file = CmiUtils.read_file filename in
+  let crc, file = CmiUtils.read_file filename in
   let sg = CmiUtils.signature file in
   let sg = CmiCompress.signature sg in
   let file = CmiUtils.with_signature file sg in
+  let file = CmiUtils.with_crc file crc in
   let backup_file = filename ^ ".old" in
   if not (Sys.file_exists backup_file) then Sys.rename filename backup_file;
   CmiUtils.write_file filename file;
   let size1 = getsize filename in
-  Printf.eprintf "%s: %d -> %d\n%!" filename size0 size1
+  Printf.eprintf "%s: %d -> %d (%d %%)\n%!" filename size0 size1
+                 (size1 * 100 / size0)
 
 let compress_dir dirname =
   let files = Sys.readdir dirname in

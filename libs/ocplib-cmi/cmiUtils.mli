@@ -13,6 +13,7 @@ type cmi_file
 
 val signature : cmi_file -> Types.signature
 val with_signature : cmi_file -> Types.signature -> cmi_file
+val with_crc : cmi_file -> Digest.t -> cmi_file
 
 val read_file : string -> Digest.t * cmi_file
 val write_file : string -> cmi_file -> unit

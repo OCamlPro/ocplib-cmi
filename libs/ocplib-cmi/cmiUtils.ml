@@ -17,6 +17,12 @@ type cmi_file = Cmi_format.cmi_infos
 
 let signature cmi = cmi.cmi_sign
 let with_signature cmi cmi_sign = { cmi with cmi_sign }
+let with_crc cmi crc =
+#if OCAML_VERSION >= "4.02.0"
+  let crc = Some crc in
+#endif
+  { cmi with cmi_crcs = (cmi.cmi_name, crc) :: cmi.cmi_crcs }
+
 let read_file filename =
   let cmi = Cmi_format.read_cmi filename in
   match cmi.cmi_crcs with
@@ -29,20 +35,36 @@ let read_file filename =
   | _ -> assert false
 
 
+let output_cmi filename oc cmi =
+(* beware: the provided signature must have been substituted for saving *)
+  output_string oc Config.cmi_magic_number;
+  output_value oc (cmi.cmi_name, cmi.cmi_sign);
+  flush oc;
+  let crcs =
+    if List.mem_assoc cmi.cmi_name cmi.cmi_crcs then
+      cmi.cmi_crcs
+    else
+      let crc = Digest.file filename in
+#if OCAML_VERSION >= "4.02.0"
+      let crc = Some crc in
+#endif
+      (cmi.cmi_name, crc) :: cmi.cmi_crcs
+  in
+  output_value oc crcs;
+  output_value oc cmi.cmi_flags
+
 #if OCAML_VERSION >= "4.06.0"
 
 let write_file filename cmi =
-  let _crc =
-    Misc.output_to_file_via_temporary (* see MPR#7472, MPR#4991 *)
-      ~mode: [Open_binary] filename
-      (fun temp_filename oc -> Cmi_format.output_cmi temp_filename oc cmi) in
-  ()
+  Misc.output_to_file_via_temporary (* see MPR#7472, MPR#4991 *)
+    ~mode: [Open_binary] filename
+    (fun temp_filename oc -> output_cmi temp_filename oc cmi)
 
 #else
 
 let write_file filename cmi =
   let oc = open_out_bin filename in
-  let _crc = Cmi_format.output_cmi filename oc cmi in
+  output_cmi filename oc cmi;
   close_out oc
 
 #endif
